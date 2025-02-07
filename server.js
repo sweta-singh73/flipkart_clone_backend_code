@@ -9,7 +9,10 @@ dbConnection();
 //import routes
 const authRouter = require("./routes/authRoute");
 const categoryRouter = require("./routes/categoryRoute");
-const foodRouter = require("./routes/foodRoute");
+const subcategoryRouter = require("./routes/subCategoryRoute");
+const innerSubcategoryRouter = require("./routes/innerSubcategoryRoute");
+const productRouter = require("./routes/productRoute");
+const cartRouter = require("./routes/cartRoute");
 const userRouter = require("./routes/userRoute");
 
 const app = express();
@@ -21,10 +24,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/uploads",express.static( path.join(__dirname, '/uploads')));
 
 //routes
-app.use("/", authRouter);
+app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/category",  categoryRouter);
-app.use("/food", foodRouter);
+app.use("/subcategory", subcategoryRouter);
+app.use("/inner_subcategory", innerSubcategoryRouter);
+app.use("/product", productRouter);
+app.use("/cart", cartRouter);
 
 app.listen(process.env.PORT, () => {
   console.log("Server is running at port", process.env.PORT);

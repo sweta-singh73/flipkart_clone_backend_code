@@ -1,4 +1,7 @@
 const Category = require('../models/categoryModels');
+const SubCategory = require('../models/subCategoryModel');
+
+//add category************************************************************ 
 const addCategory = async(req, res)=>{
   try {
     const {categoryName} = req.body;
@@ -19,7 +22,8 @@ const addCategory = async(req, res)=>{
     });
   }
 }
-                                     
+      
+//get all category list************************************************** 
 const getAllCtegory = async(req, res)=>{
   try {
     const category = await Category.find();
@@ -34,8 +38,21 @@ const getAllCtegory = async(req, res)=>{
       message:error.message
     })
   }
-}           
+}  
 
+//fetch all subcategory through single category id******************************************* 
+const singleCategory = async (req, res)=>{
+  try {
+    const categoryId = req.params.id;
+    const subCategory = await SubCategory.find({category_id:categoryId});
+    if(!subCategory)return res.status(400).json({error:"subcategory not found!"});
+    return res.status(200).json({message:"subcategory fetch successfully!", data:subCategory});
+  } catch (error) {
+    
+  }
+}
+
+//update category*************************************************** 
 const updateCategory = async(req, res)=>{
   try {
     const categoryId = req.params.id;
@@ -57,4 +74,4 @@ const updateCategory = async(req, res)=>{
 }
 
 
-module.exports = {addCategory, getAllCtegory, updateCategory}
+module.exports = {addCategory, getAllCtegory, updateCategory, singleCategory}
