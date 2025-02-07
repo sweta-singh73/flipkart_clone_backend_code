@@ -4,13 +4,17 @@ const InnerSubCategory = require('../models/innerSubCategoryModel');
 const mongoose = require("mongoose");
 const Product = require('../models/productModel');
 
+
+
 //add sub category******************************************************************** 
 const subcategoryAdd = async (req, res) => {
   try {
     const cleanedBody = Object.fromEntries(
       Object.entries(req.body).map(([key, value]) => [key.trim(), value])
     );
-    console.log("req.body", req.body)
+    console.log("req.body", req.body);
+   const userId = req.user._id;
+
     const { category_id, sub_category_name } = cleanedBody;
 
     console.log("Received category_id:", category_id); // Debugging log
@@ -52,7 +56,7 @@ const subcategoryAdd = async (req, res) => {
   }
 };
 
-//get all subcategory************************************************* 
+//get all list of subcategory************************************************* 
 const listSubcategory = async(req, res)=>{
   try {
     const subcategory =await SubCategory.find();
@@ -120,6 +124,21 @@ const addInnerSubcategories = async(req, res)=>{
 } 
 
 
+//vew innersubcategory************************************************************
+const viewInnerSubcategory = async(req, res)=>{
+  try {
+    const innerSubcategory_id = req.params.id;
+    const innerSubcategory = await InnerSubCategory.findOne({_id:innerSubcategory_id});
+
+    if(!innerSubcategory)return res.status(400).json({error:"inner subcategory not found!"});
+    return res.status(200).json({message:"inner subcategory fetch successfully!", data:innerSubcategory});
+  } catch (error) {
+    return res.status(500).json({error:error.message});
+  }
+}
+
+//fetch product according to single inner subcategories***************************************************
+
 const singleInnerSubcategories = async (req, res) => {
   try {
     const innerSubcategory_id = req.params.id;
@@ -157,5 +176,8 @@ const singleInnerSubcategories = async (req, res) => {
 
 
 
-module.exports = { subcategoryAdd, listSubcategory, addInnerSubcategories, singleSubcategory, singleInnerSubcategories };
+
+
+
+module.exports = { subcategoryAdd, listSubcategory, addInnerSubcategories, singleSubcategory, singleInnerSubcategories, viewInnerSubcategory };
 

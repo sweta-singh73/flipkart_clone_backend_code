@@ -1,3 +1,6 @@
+# Node modules
+node_modules/
+
 # Logs
 logs
 *.log
@@ -6,16 +9,14 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+# Environment files
 .env*
-node_modules
-dist
-dist-ssr
-*.local
 .env
 .env.staging
 .env.uat
+
 # Editor directories and files
-!.vscode/extensions.json
 .idea
 .DS_Store
 *.suo
@@ -23,7 +24,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Redis dump file
 dump.rdb
- 
+
+# Package lock
 package-lock.json
-vite.config.ts.timestamp-*

@@ -1,16 +1,16 @@
 const { securePassword, createToken } = require("../helpers/helpers");
-// const { handleValidation } = require('../helpers/validation');
+const { handleValidation } = require('../helpers/validation');
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const signUp = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    //handle the validation request of body
-    //  const validationErr = await handleValidation(
-    //       { name, username, email, phone, password },
-    //       res
-    //     );
-    //     if (validationErr) return validationErr;
+    // handle the validation request of body
+     const validationErr = await handleValidation(
+          { name, email, password },
+          res
+        );
+        if (validationErr) return validationErr;
     // Check if the user already exists
     const user = await User.findOne({ email });
     if (user) {
@@ -29,16 +29,18 @@ const signUp = async (req, res) => {
       email,
       password: hashPassword,
     });
-    console.log("userdata", userData);
 
     // Save user data to the database
     const userDetails = await userData.save();
+
+    //remove password in the api response 
+    const { password: _password, ...userWithoutPassword } = userDetails.toObject();
 
     // Send success response
     return res.status(200).json({
       success: true,
       message: "User signed up successfully",
-      data: userDetails,
+      data: userWithoutPassword,
     });
   } catch (error) {
     return res.status(500).json({
@@ -52,6 +54,12 @@ const signUp = async (req, res) => {
 const logIn = async (req, res) => {
   try {
     const { email, password } = req.body;
+    // handle the validation request of body
+     const validationErr = await handleValidation(
+          {  email, password },
+          res
+        );
+        if (validationErr) return validationErr;
     const user = await User.findOne({ email });
     if (!user)
       return res.status(409).json({
@@ -68,6 +76,7 @@ const logIn = async (req, res) => {
     const userDetails = {
       _id: user._id,
       name: user.name,
+      role: user.role,
       token: token,
     };
     return res.status(200).json({

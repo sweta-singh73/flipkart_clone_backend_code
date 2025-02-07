@@ -1,53 +1,51 @@
-//Empty validation
-const isEmpty = async(data)=>{
-const arr = [];
-for(const [key, value]  of Object.entries(data)){
-  if(value == "" || value == undefined || value == null ){
-    arr.push(`${key} is required`)
+// Empty field validation
+const isEmpty = async (data) => {
+  const arr = [];
+  for (const [key, value] of Object.entries(data)) {
+    if (value == "" || value == undefined || value == null) {
+      arr.push(`${key} is required`);
+    }
   }
-}
   return arr;
-}
+};
 
-//trim extra spaces validation 
-let trimExtra = async (str) => {
-  var trimedStr = str.trim();
-  console.log(trimedStr);
-  return str;
-}
+// Trim extra spaces
+const trimExtra = async (str) => {
+  return str.trim(); // Return the trimmed string, not the original one
+};
 
-//email validation
-const emailValodator = async(email)=>{
-  const emailFormate =  /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-  if(email !=="" && email.match(emailFormate)){
+// Email validation
+const emailValidator = async (email) => {
+  const emailFormat = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+  if (email && email.match(emailFormat)) {
     return true;
   }
   return false;
-}
+};
 
-//phone number validator 
-const phoneValidator = async(phone)=>{
-const phoneFormate = /^((\+1)?[\s-]?)?\(?[1-9]\d\d\)?[\s-]?[1-9]\d\d[\s-]?\d\d\d\d/;
-if(phone !=="" && phone.match(phoneFormate)){
-  return true;
-}
-return false;
-}
+// Phone number validation
+const phoneValidator = async (phone) => {
+  const phoneFormat = /^((\+1)?[\s-]?)?\(?[1-9]\d\d\)?[\s-]?[1-9]\d\d[\s-]?\d\d\d\d/;
+  if (phone && phone.match(phoneFormat)) {
+    return true;
+  }
+  return false;
+};
 
-//password validation
+// Password validation
 const passwordValidator = (password) => {
   let errors = [];
 
   if (password.length < 8) {
-    errors.push("Your password must be at least 8 characters.");
+    errors.push("Password must be at least 8 characters.");
   }
 
   if (password.search(/[a-z]/i) < 0) {
-    errors.push("Your password must contain at least one letter.");
+    errors.push("Password must contain at least one letter.");
   }
 
   if (password.search(/[0-9]/) < 0) {
-    errors.push("Your password must contain at least one digit.");
+    errors.push("Password must contain at least one digit.");
   }
 
   if (errors.length > 0) {
@@ -57,64 +55,61 @@ const passwordValidator = (password) => {
   return { isValid: true, errors: [] };
 };
 
-//username validation
-const userNameValidator = async(username)=>{
-  const userNameFormate = /^[a-z0-9_\.]+$/;
-  if(username !== "" && username.match(userNameFormate)){
+// Username validation (only lowercase letters, numbers, underscores, and dots)
+const userNameValidator = async (username) => {
+  const userNameFormat = /^[a-z0-9_\.]+$/;
+  if (username && username.match(userNameFormat)) {
     return true;
   }
   return false;
-}
+};
 
-//name validation
-const nameValidator = async(name)=>{
-  const nameFormate = /^[a-zA-Z ]+$/;
-  if(name !== "" && name.match(nameFormate)){
+// Name validation (only letters and spaces allowed)
+const nameValidator = async (name) => {
+  const nameFormat = /^[a-zA-Z ]+$/;
+  if (name && name.match(nameFormat)) {
     return true;
   }
   return false;
-}
+};
 
-// validate all validation data
-const validateData = async(data)=>{
+// Validate all the data
+const validateData = async (data) => {
   const arr = [];
-  for(const [key, value] of Object.entries(data)){
-    if(key == email){
-      const emailValid = await emailValodator(value);
-      if(!emailValid){
+  for (const [key, value] of Object.entries(data)) {
+    if (key === "email") {
+      const emailValid = await emailValidator(value);
+      if (!emailValid) {
         arr.push(`${key} is invalid`);
       }
-    }
-    else if(key == name){
-      const nameValid = await nameValidator(value)
-        if(!nameValid){
-          arr.push(`${key} is invalid`)
-        }
-    }
-    else if(key == username){
-      const userNameValid = await userNameValidator(value)
-      if(!userNameValid){
-        arr.push(`${key} is invalid`)
+    } else if (key === "name") {
+      const nameValid = await nameValidator(value);
+      if (!nameValid) {
+        arr.push(`${key} is invalid`);
+      }
+    } else if (key === "username") {
+      const userNameValid = await userNameValidator(value);
+      if (!userNameValid) {
+        arr.push(`${key} is invalid`);
+      }
+    } else if (key === "phone") {
+      const phoneValid = await phoneValidator(value);
+      if (!phoneValid) {
+        arr.push(`${key} is invalid`);
+      }
+    } else if (key === "password") {
+      const { isValid, errors } = await passwordValidator(value);
+      if (!isValid) {
+        arr.push(`${key} is invalid: ${errors.join(", ")}`);
       }
     }
-    else if(key == phone){
-      const phoneValid = await phoneValidator(value)
-      if(!phoneValid){
-        arr.push(`${key} is invalid`)
-      }
-    }
-    else if (key == "password") {
-      let passwordValid = await passwordValidator(value);
-      if (!passwordValid.isValid) {
-          arr.push(`${key} is invalid: ${passwordValid.errors.join(", ")}`);
-      }
-  }
-
   }
   return arr;
-}
-//handle the validation of the request body
+};
+
+// Handle all validation
 const handleValidation = async (data, res) => {
+  // First check if any required field is empty
   const emptyFields = await isEmpty(data);
   if (emptyFields.length > 0) {
     return res
@@ -122,22 +117,20 @@ const handleValidation = async (data, res) => {
       .json({ message: "All fields are required!", data: emptyFields });
   }
 
+  // Now validate the individual fields
   const invalidData = await validateData(data);
   if (invalidData.length > 0) {
     return res
       .status(400)
       .json({ message: "Data must be valid!", data: invalidData });
   }
-  return null; // Return null if there are no validation errors
+
+  return null; // No errors, proceed with the request
 };
 
-
-
-
-
-module.exports = { 
+module.exports = {
   isEmpty,
-  emailValodator,
+  emailValidator,
   phoneValidator,
   passwordValidator,
   userNameValidator,
@@ -145,8 +138,4 @@ module.exports = {
   nameValidator,
   validateData,
   handleValidation
-} 
-
-
-
-
+};

@@ -1,20 +1,31 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/userModel"); // Ensure you import the User model
 
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.headers.authorization?.split(" ")[1];
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Unauthorized: No token provided" });
+    if (!token) {
+      return res.status(401).json({ error: "Access denied. No token provided." });
     }
 
-    const token = authHeader.split(" ")[1]; // Extract the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-    req.user = decoded; // Attach decoded user data to request
+    // 🔹 Fetch user from DB to get role
+    const user = await User.findById(decoded._id).select("-password"); // Exclude password
+
+    if (!user) {
+      return res.status(401).json({ error: "User not found." });
+    }
+
+    req.user = user; // ✅ Attach full user object to req.user
+
+    console.log(req.user, "req.user"); // ✅ Debugging log
+
     next();
   } catch (error) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+    console.error("Token verification error:", error);
+    return res.status(401).json({ error: "Invalid token." });
   }
 };
 

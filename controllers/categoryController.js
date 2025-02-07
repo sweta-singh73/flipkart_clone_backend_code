@@ -1,27 +1,47 @@
 const Category = require('../models/categoryModels');
 const SubCategory = require('../models/subCategoryModel');
+const User = require('../models/userModel');
 
 //add category************************************************************ 
-const addCategory = async(req, res)=>{
+const addCategory = async (req, res) => {
   try {
-    const {categoryName} = req.body;
-    const images = req.file.path;
-    const category= await Category.create({
+    //userId decoded through middleware
+    const userId = req.user._id;
+    console.log("User ID:", userId);
+
+    const { categoryName } = req.body;
+    if (!categoryName) {
+      return res.status(400).json({ success: false, error: "Category name is required." });
+    }
+
+    // Ensure an image is uploaded
+    if (!req.file || !req.file.path) {
+      return res.status(400).json({ success: false, error: "Category image is required." });
+    }
+
+    const imagePath = req.file.path;
+
+    // Create the category
+    const category = await Category.create({
       categoryName,
-      images
+      images: imagePath
     });
-    return res.status(200).json({
-      success:true,
-      message:"food item added successfully",
-      data:category
-    })
+
+    return res.status(201).json({
+      success: true,
+      message: "Category added successfully",
+      data: category
+    });
   } catch (error) {
+    console.error("Error adding category:", error);
     return res.status(500).json({
-      success:false,
-      message:error.message
+      success: false,
+      error: "Internal Server Error",
+      message: error.message
     });
   }
-}
+};
+
       
 //get all category list************************************************** 
 const getAllCtegory = async(req, res)=>{
